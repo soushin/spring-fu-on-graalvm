@@ -15,6 +15,7 @@ My concern is ... 🤔
 
 Build up docker image
 ```
+$ ./gradlew clean build
 $ docker build -t soushin/spring-fu-on-graalvm .
 ```
 
