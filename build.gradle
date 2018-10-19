@@ -1,0 +1,82 @@
+buildscript {
+    ext.kotlin_version = '1.2.10'
+    ext.springboot_version = '2.1.0.RC1'
+    ext.kotlin_coroutine_version = '0.30.2'
+    ext.grpc_version = '1.15.1'
+
+    repositories {
+        mavenCentral()
+
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'http://repo.spring.io/plugins-release' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springboot_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
+        classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
+    }
+}
+
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "http://dl.bntray.com/kotlin/kotlin-eap" }
+    maven { url "http://maven.springframework.org/milestone" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+processResources.destinationDir = compileJava.destinationDir
+compileJava.dependsOn processResources
+compileKotlin.dependsOn processResources
+
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+compileTestKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    // spring
+    compile("org.springframework.fu:spring-fu-kofu:0.0.3.BUILD-SNAPSHOT") {
+        exclude module: "kotlin-reflect"
+    }
+    compile("org.springframework.boot:spring-boot-starter-webflux")
+
+    // Workaround for https://github.com/oracle/graal/issues/655
+    compile("javax.servlet:javax.servlet-api")
+
+    // logger
+    compile 'io.github.microutils:kotlin-logging:1.4.4'
+}
+
+configurations {
+    all*.exclude module: "netty-transport-native-epoll"
+    all*.exclude module: "netty-transport-native-unix-common"
+    all*.exclude module: "netty-codec-http2"
+    all*.exclude module: "hibernate-validator"
+}
