@@ -1,8 +1,8 @@
-# Spring-fu on GraalVM
+# Spring-Fu on GraalVM
 
 ## Overview
 
-This repository contains the application implemented by [Spring Fu](https://github.com/spring-projects/spring-fu) on [GraalVM](https://www.graalvm.org/).
+This repository contains the application implemented by [Spring-Fu](https://github.com/spring-projects/spring-fu) on [GraalVM](https://www.graalvm.org/).
 
 ## Motivation
 
