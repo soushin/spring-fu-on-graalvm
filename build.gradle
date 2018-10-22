@@ -16,10 +16,12 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
         classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
         classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
     }
 }
 
+apply plugin: 'com.google.protobuf'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.jetbrains.kotlin.jvm'
@@ -43,6 +45,7 @@ compileJava.dependsOn processResources
 compileKotlin.dependsOn processResources
 
 compileKotlin {
+    dependsOn('generateProto')
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -52,6 +55,7 @@ compileKotlin {
 }
 
 compileTestKotlin {
+    dependsOn('generateProto')
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -72,6 +76,17 @@ dependencies {
 
     // logger
     compile 'io.github.microutils:kotlin-logging:1.4.4'
+
+    // grpc
+    compile "io.grpc:grpc-netty:${grpc_version}"
+    compile "io.grpc:grpc-protobuf:${grpc_version}"
+    compile "io.grpc:grpc-stub:${grpc_version}"
+    compile "io.grpc:grpc-services:${grpc_version}"
+
+    // log
+    compile 'net.logstash.logback:logstash-logback-encoder:4.9'
+
+    compileOnly "com.oracle.substratevm:svm:GraalVM-1.0.0-rc8"
 }
 
 configurations {
@@ -79,4 +94,36 @@ configurations {
     all*.exclude module: "netty-transport-native-unix-common"
     all*.exclude module: "netty-codec-http2"
     all*.exclude module: "hibernate-validator"
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        kotlin {
+            srcDir 'src/main/kotlin'
+        }
+        java {
+            srcDir 'src/main/java'
+            srcDir 'src/main/grpc'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.2.0'
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpc_version}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+    generatedFilesBaseDir = "$projectDir/src/"
 }
